@@ -6,10 +6,6 @@ exports.up = function (knex) {
   return knex.schema.createTable("wallets", function (table) {
     table.increments().primary();
     table.integer("user_id").unsigned();
-    //   .references("id")
-    //   .inTable("users")
-    //   .onDelete("CASCADE")
-    //   .onUpdate("CASCADE");
     table.decimal("account_balance", 9, 2);
     table.uuid("account_id").notNullable().unique();
     table
