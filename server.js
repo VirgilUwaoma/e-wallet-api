@@ -11,6 +11,10 @@ server.use(express.json());
 server.use("/api/v1/auth", authRoutes);
 server.use("/api/v1/wallet", walletRoutes);
 
+server.get("/", (req, res) => {
+  res.json({ message: "Welcome" });
+});
+
 server.listen(PORT, () => {
   console.log(`\nServer running on port ${PORT}\n`);
 });
