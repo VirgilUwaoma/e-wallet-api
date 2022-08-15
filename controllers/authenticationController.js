@@ -2,7 +2,7 @@ const userModel = require("../models/user");
 const walletModel = require("../models/wallet");
 const bcrypt = require("bcrypt");
 const { v4: uuidv4 } = require("uuid");
-const { issueToken } = require("../utilities/jwt");
+const { issueToken } = require("../utilities/issueTokens");
 
 async function registerUser(req, res) {
   let request = req.body;
@@ -73,20 +73,21 @@ async function loginUser(req, res) {
     return res.status(400).json({ message: "password required" });
   try {
     const existingUser = await userModel.getByEmail(loginDetails.email);
-    console.log(existingUser);
     correctPassword = await bcrypt.compare(
       loginDetails.password,
       existingUser[0].password
     );
     if (!correctPassword)
       return res.status(400).json({ message: "wrong password" });
-    else {
-      console.log(existingUser);
-      token = await issueToken(existingUser);
-      return res.status(200).json({ token });
-    }
+    const tokenDetails = {
+      id: existingUser[0].id,
+      email: existingUser[0].email,
+      mobile_number: existingUser[0].mobile_number,
+      actions: "all",
+    };
+    const token = await issueToken(tokenDetails);
+    return res.status(200).json({ message: "login successful", token });
   } catch (error) {
-    console.log(error);
     return res.status(501).json({ message: error.message });
   }
 }
