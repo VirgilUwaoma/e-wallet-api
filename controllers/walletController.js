@@ -70,11 +70,13 @@ async function withdraw(req, res) {
   try {
     const request = req.body;
     if (!request.amount || typeof request.amount !== "number")
-      return res.status(400).json({ message: "withdrawal amount required" });
+      return res
+        .status(400)
+        .json({ message: "withdrawal amount required", success: false });
     if (request.amount <= 0)
       return res
         .status(400)
-        .json({ message: "amount cannot be zero or negative" });
+        .json({ message: "amount cannot be zero or negative", success: false });
 
     const transactionId = uuidv4();
     const transactionDetails = {
@@ -96,6 +98,7 @@ async function withdraw(req, res) {
         message: "insufficient funds",
         amount: request.amount,
         balance: currentBalance,
+        success: false,
       });
 
     try {
@@ -110,6 +113,7 @@ async function withdraw(req, res) {
         amount: request.amount,
         balance: newBalance,
         transaction_id: transactionId,
+        success: true,
       });
     } catch (error) {
       await walletModel.updateWalletBalance(
@@ -124,6 +128,7 @@ async function withdraw(req, res) {
         amount: request.amount,
         balance: currentBalance,
         transaction_id: transactionId,
+        success: false,
       });
     }
   } catch (error) {
