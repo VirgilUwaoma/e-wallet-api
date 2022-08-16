@@ -7,11 +7,13 @@ async function fundWallet(req, res) {
   try {
     const request = req.body;
     if (!request.amount || typeof request.amount !== "number")
-      return res.status(400).json({ message: "fund amount required" });
+      return res
+        .status(400)
+        .json({ message: "fund amount required", success: false });
     if (request.amount <= 0)
       return res
         .status(400)
-        .json({ message: "amount cannot be zero or negative" });
+        .json({ message: "amount cannot be zero or negative", success: false });
 
     const transactionId = uuidv4();
     const transactionDetails = {
@@ -38,10 +40,10 @@ async function fundWallet(req, res) {
       await transactionModel.newTransaction(transactionDetails);
 
       return res.status(200).json({
-        message: "wallet credited",
-        amount: request.amount,
+        message: `wallet credited ${request.amount}`,
         balance: newBalance,
         transaction_id: transactionId,
+        success: true,
       });
     } catch (error) {
       await walletModel.updateWalletBalance(
@@ -56,6 +58,7 @@ async function fundWallet(req, res) {
         amount: request.amount,
         balance: currentBalance,
         transaction_id: transactionId,
+        success: false,
       });
     }
   } catch (error) {

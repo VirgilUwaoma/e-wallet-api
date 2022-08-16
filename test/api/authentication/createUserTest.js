@@ -6,21 +6,12 @@ const knex = require("../../../database/db_config");
 describe("POST /auth/register", () => {
   describe("request body is empty", () => {
     const req = {};
-    it("should return status 400", (done) => {
+    it("should return status 400, json with message -'empty request body'", (done) => {
       request(server)
         .post("/api/v1/auth/register")
         .send(req)
         .then((res) => {
           expect(res.status).to.equal(400);
-          done();
-        })
-        .catch(done);
-    });
-    it("should return json with message 'empty request body'", (done) => {
-      request(server)
-        .post("/api/v1/auth/register")
-        .send(req)
-        .then((res) => {
           expect(res.body).to.contain.property("message");
           expect(res.body.message).to.equal("empty request body");
           expect(typeof res.body).to.equal("object");
@@ -68,23 +59,12 @@ describe("POST /auth/register", () => {
       },
     ];
     list.forEach((req) => {
-      it("should return status 400", (done) => {
+      it("should return status 400, json with message 'required field missing'", (done) => {
         request(server)
           .post("/api/v1/auth/register")
           .send(req)
           .then((res) => {
             expect(res.status).to.equal(400);
-            done();
-          })
-          .catch(done);
-      });
-    });
-    list.forEach((req) => {
-      it("should return json with message 'required field missing'", (done) => {
-        request(server)
-          .post("/api/v1/auth/register")
-          .send(req)
-          .then((res) => {
             expect(res.body).to.contain.property("message");
             expect(res.body.message).to.equal("required field missing");
             expect(typeof res.body).to.equal("object");
@@ -95,38 +75,29 @@ describe("POST /auth/register", () => {
     });
   });
   describe("proper request body", () => {
-    req = {
-      first_name: "User-1",
+    const req = {
+      first_name: "User-3",
       last_name: "User",
-      email: "user1@user.com",
-      password: "password",
-      mobile_number: 1,
+      email: "user3@user.com",
+      password: "1",
+      mobile_number: 3,
     };
-    beforeEach(function () {
-      return knex.migrate.rollback(true).then(function () {
-        return knex.migrate.latest();
-      });
+    before(function () {
+      return knex.migrate
+        .rollback()
+        .then(function () {
+          return knex.migrate.latest();
+        })
+        .then(function () {
+          return knex.seed.run();
+        });
     });
-    after(function () {
-      return knex.migrate.rollback(true).then(function () {
-        return knex.migrate.latest();
-      });
-    });
-    it("should return status 201", (done) => {
+    it("should return status 201, json with success - true", (done) => {
       request(server)
         .post("/api/v1/auth/register")
         .send(req)
         .then((res) => {
           expect(res.status).to.equal(201);
-          done();
-        })
-        .catch(done);
-    });
-    it("should return json with success - true", (done) => {
-      request(server)
-        .post("/api/v1/auth/register")
-        .send(req)
-        .then((res) => {
           expect(res.body.sucess).to.equal(true);
           expect(res.body.message).to.equal(
             `created account for ${req.first_name}`
@@ -156,21 +127,12 @@ describe("POST /auth/register", () => {
         });
     });
 
-    it("should return status 409", (done) => {
+    it("should return status 409, json with success-false", (done) => {
       request(server)
         .post("/api/v1/auth/register")
         .send(req)
         .then((res) => {
           expect(res.status).to.equal(409);
-          done();
-        })
-        .catch(done);
-    });
-    it("should return json with success false", (done) => {
-      request(server)
-        .post("/api/v1/auth/register")
-        .send(req)
-        .then((res) => {
           expect(res.body.success).to.equal(false);
           expect(res.body.message).to.equal("user with email already exists");
           done();
@@ -198,21 +160,12 @@ describe("POST /auth/register", () => {
         });
     });
 
-    it("should return status 409", (done) => {
+    it("should return status 409, json with success false", (done) => {
       request(server)
         .post("/api/v1/auth/register")
         .send(req)
         .then((res) => {
           expect(res.status).to.equal(409);
-          done();
-        })
-        .catch(done);
-    });
-    it("should return json with success false", (done) => {
-      request(server)
-        .post("/api/v1/auth/register")
-        .send(req)
-        .then((res) => {
           expect(res.body.success).to.equal(false);
           expect(res.body.message).to.equal(
             "user with mobile number already exists"
