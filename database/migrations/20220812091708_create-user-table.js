@@ -9,7 +9,7 @@ exports.up = function (knex) {
     table.string("last_name").notNullable();
     table.string("email").unique().notNullable();
     table.string("password").notNullable();
-    table.string("mobile_number").unique().notNullable();
+    table.integer("mobile_number").unique().notNullable();
     table.timestamps(true, true, false);
   });
 };

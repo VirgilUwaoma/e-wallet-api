@@ -15,6 +15,8 @@ server.get("/", (req, res) => {
   res.json({ message: "Welcome" });
 });
 
+module.exports = server;
+
 server.listen(PORT, () => {
   console.log(`\nServer running on port ${PORT}\n`);
 });

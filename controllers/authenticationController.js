@@ -7,28 +7,34 @@ const { issueToken } = require("../utilities/issueTokens");
 async function registerUser(req, res) {
   let request = req.body;
   const reqBodyLength = Object.keys(request).length;
-  if (!request || reqBodyLength != 5) {
-    return res.status(400).json({ message: "malformed request body" });
+  if (reqBodyLength === 0) {
+    return res.status(400).json({ message: "empty request body" });
   }
-  //consider refactor below to switch case
-  if (!request.first_name)
-    return res.status(400).json({ message: "First is name required" });
-  if (!request.last_name)
-    return res.status(400).json({ message: "Lastname is required" });
-  if (!request.email)
-    return res.status(400).json({ message: "Email is required" });
-  if (!request.password)
-    return res.status(400).json({ message: "Password is required" });
-  if (!request.mobile_number)
-    return res.status(400).json({ message: "Mobile number is required" });
+
+  if (
+    !request.first_name ||
+    !request.last_name ||
+    !request.password ||
+    !request.mobile_number ||
+    !request.email
+  )
+    return res.status(400).json({ message: "required field missing" });
+
   try {
     const existingEmail = await userModel.getByEmail(request.email);
     const existingMobile = await userModel.getByMobile(request.mobile_number);
 
-    if (existingEmail.length != 0 || existingMobile.length != 0) {
-      return res
-        .status(409)
-        .json({ message: `User with email or mobile numer already exists` });
+    if (existingEmail.length != 0) {
+      return res.status(409).json({
+        message: `user with email already exists`,
+        success: false,
+      });
+    }
+    if (existingMobile.length != 0) {
+      return res.status(409).json({
+        message: `user with mobile number already exists`,
+        success: false,
+      });
     }
 
     const encryptedPassword = await bcrypt.hash(request.password, 10);
@@ -39,7 +45,6 @@ async function registerUser(req, res) {
       password: encryptedPassword,
       mobile_number: request.mobile_number,
     };
-    console.log(newUser);
     await userModel.createUser(newUser);
     const retrieveUser = await userModel.getByEmail(newUser.email);
     try {
@@ -54,7 +59,8 @@ async function registerUser(req, res) {
       return res.status(500).json({ message: error.message });
     }
     res.status(201).json({
-      message: `Created account for ${newUser.first_name}`,
+      message: `created account for ${newUser.first_name}`,
+      sucess: true,
     });
   } catch (error) {
     return res.status(501).json({ message: error.message });
