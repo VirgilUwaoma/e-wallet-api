@@ -70,21 +70,26 @@ async function registerUser(req, res) {
 async function loginUser(req, res) {
   const loginDetails = req.body;
   const reqBodyLength = Object.keys(loginDetails).length;
-  if (!reqBodyLength || reqBodyLength != 2) {
-    return res.status(400).json({ message: "malformed request body" });
+  if (!reqBodyLength) {
+    return res
+      .status(400)
+      .json({ message: "empty request body", success: false });
   }
   if (!loginDetails.email)
-    return res.status(400).json({ message: "email required" });
+    return res.status(400).json({ message: "email required", success: false });
   if (!loginDetails.password)
-    return res.status(400).json({ message: "password required" });
+    return res
+      .status(400)
+      .json({ message: "password required", success: false });
   try {
     const existingUser = await userModel.getByEmail(loginDetails.email);
     correctPassword = await bcrypt.compare(
       loginDetails.password,
       existingUser[0].password
     );
-    if (!correctPassword)
+    if (!correctPassword) {
       return res.status(400).json({ message: "wrong password" });
+    }
     const tokenDetails = {
       id: existingUser[0].id,
       email: existingUser[0].email,
@@ -92,9 +97,13 @@ async function loginUser(req, res) {
       actions: "all",
     };
     const token = await issueToken(tokenDetails);
-    return res.status(200).json({ message: "login successful", token });
+    return res
+      .status(200)
+      .json({ message: "login successful", token, success: true });
   } catch (error) {
-    return res.status(501).json({ message: error.message });
+    return res
+      .status(400)
+      .json({ message: "user email doesn't exist", success: false });
   }
 }
 module.exports = {

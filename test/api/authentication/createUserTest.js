@@ -2,7 +2,6 @@ const expect = require("chai").expect;
 const request = require("supertest");
 const server = require("../../../server");
 const knex = require("../../../database/db_config");
-const { should } = require("chai");
 
 describe("POST /auth/register", () => {
   describe("request body is empty", () => {
