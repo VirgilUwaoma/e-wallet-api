@@ -140,11 +140,13 @@ async function transfer(req, res) {
   let request = req.body;
   try {
     if (!request.amount || typeof request.amount !== "number")
-      return res.status(400).json({ message: "transfer amount required" });
+      return res
+        .status(400)
+        .json({ message: "transfer amount required", success: false });
     if (request.amount <= 0)
       return res
         .status(400)
-        .json({ message: "amount cannot be zero or negative" });
+        .json({ message: "amount cannot be zero or negative", success: false });
     if (!request.receiver_mobile)
       return res
         .status(400)
@@ -157,9 +159,10 @@ async function transfer(req, res) {
       request.receiver_mobile
     );
     if (receiverWallet[0].user_id == senderWallet[0].user_id)
-      return res
-        .status(400)
-        .json({ message: "Cannot transfer to your own wallet" });
+      return res.status(400).json({
+        message: "Cannot transfer to your own wallet",
+        success: false,
+      });
 
     const senderCurrBalance = senderWallet[0].account_balance;
     const senderNewBalance = senderCurrBalance - request.amount;
@@ -168,6 +171,7 @@ async function transfer(req, res) {
         message: "insufficient funds",
         amount: request.amount,
         balance: senderCurrBalance,
+        success: false,
       });
 
     const receiverCurrBalance = receiverWallet[0].account_balance;
@@ -194,12 +198,14 @@ async function transfer(req, res) {
         receiverNewBalance
       );
       await transactionModel.newTransaction(transactionDetails);
-      res.status(200).json({
-        message: "transfer to successful",
+      res.status(201).json({
+        message: "transfer successful",
+        recipient_mobile: request.receiver_mobile,
         amount: request.amount,
         prev_balance: senderCurrBalance,
         current_balance: senderNewBalance,
         transaction_id: transactionId,
+        success: true,
       });
     } catch (error) {
       await walletModel.updateWalletBalance(
@@ -221,7 +227,9 @@ async function transfer(req, res) {
       });
     }
   } catch (error) {
-    return res.status(500).json({ message: error.message });
+    return res
+      .status(400)
+      .json({ message: "user doesn't exist", success: false });
   }
 }
 
