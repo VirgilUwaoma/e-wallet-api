@@ -11,9 +11,13 @@ module.exports = {
     connection: {
       host: process.env.DB_HOST,
       database: process.env.DB_NAME,
-      port: process.env.DB_PORT,
       user: process.env.DB_USER,
       password: process.env.DB_PASSWORD,
+      port: process.env.DB_PORT,
+    },
+    pool: {
+      min: 2,
+      max: 10,
     },
     migrations: {
       directory: __dirname + "/database/migrations",
@@ -24,7 +28,17 @@ module.exports = {
   },
   production: {
     client: "mysql",
-    connection: process.env.CLEARDB_DATABASE_URL,
+    connection: {
+      host: process.env.DB_HOST,
+      database: process.env.DB_NAME,
+      user: process.env.DB_USER,
+      password: process.env.DB_PASSWORD,
+      ssl: { rejectUnauthorized: false },
+    },
+    pool: {
+      min: 2,
+      max: 10,
+    },
     migrations: {
       directory: __dirname + "/database/migrations",
     },
